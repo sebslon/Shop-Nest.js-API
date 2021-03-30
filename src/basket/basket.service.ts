@@ -20,14 +20,14 @@ export class BasketService {
 
   addProduct(product: AddProductDto): AddProductToBasketResponse {
     const { name, count } = product;
-    const invalidProductOrNotInStock =
+    const invalidProductDetailsOrNotInStock =
       typeof name !== 'string' ||
       typeof count !== 'number' ||
       name === '' ||
       count < 1 ||
       !this.shopService.hasProduct(name);
 
-    if (invalidProductOrNotInStock) {
+    if (invalidProductDetailsOrNotInStock) {
       return { isSuccess: false };
     }
 
@@ -53,6 +53,14 @@ export class BasketService {
 
   getTotalPrice(): GetTotalPriceResponse {
     const taxAdded = 1.23;
+
+    if (!this.items.every((item) => this.shopService.hasProduct(item.name))) {
+      const alternativeBasket = this.items.filter((item) =>
+        this.shopService.hasProduct(item.name),
+      );
+
+      return { isSuccess: false, alternativeBasket };
+    }
 
     return this.items
       .map(

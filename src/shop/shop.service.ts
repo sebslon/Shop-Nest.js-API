@@ -4,9 +4,9 @@ import { GetListOfProductsResponse, ShopItem } from 'src/interfaces/shop';
 @Injectable()
 export class ShopService {
   private items: ShopItem[] = [
-    { name: 'T-Shirt', price: 20, description: 'Fajny opis' },
-    { name: 'T-Shirt', price: 20, description: 'Fajny opis' },
-    { name: 'T-Shirt', price: 20, description: 'Fajny opis' },
+    { name: 'T-Shirt', price: 20, count: 0, description: 'Fajny opis' },
+    { name: 'T-Shirt2', price: 20, count: 1, description: 'Fajny opis' },
+    { name: 'T-Shirt3', price: 20, count: 1, description: 'Fajny opis' },
   ];
 
   getProducts(): GetListOfProductsResponse {
@@ -18,6 +18,6 @@ export class ShopService {
   }
 
   getPriceOfProduct(name: string): number {
-    return this.getProducts().find(item => item.name === name).price;
+    return this.getProducts().find((item) => item.name === name).price;
   }
 }

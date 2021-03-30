@@ -18,4 +18,5 @@ export type GetTotalPriceResponse =
   | number
   | {
       isSuccess: false;
+      alternativeBasket: AddProductDto[];
     };
