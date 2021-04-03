@@ -25,8 +25,8 @@ export class ShopController {
     return this.shopService.removeProduct(id);
   }
 
-  @Post('/')
-  createNewProduct(): Promise<CreateProductResponse> {
-    return this.shopService.createProduct();
-  }
+  // @Post('/')
+  // createNewProduct(): Promise<CreateProductResponse> {
+  //   return this.shopService.createProduct();
+  // }
 }

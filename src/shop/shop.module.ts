@@ -6,10 +6,7 @@ import { ShopController } from './shop.controller';
 import { ShopService } from './shop.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ShopItem]),
-    forwardRef(() => BasketModule),
-  ],
+  imports: [forwardRef(() => BasketModule)],
   controllers: [ShopController],
   providers: [ShopService],
   exports: [ShopService],

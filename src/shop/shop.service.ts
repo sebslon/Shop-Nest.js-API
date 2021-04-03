@@ -7,16 +7,13 @@ import { ShopItem } from './shop-item.entity';
 
 @Injectable()
 export class ShopService {
-
   constructor(
     @Inject(forwardRef(() => BasketService))
     private basketService: BasketService,
-    @InjectRepository(ShopItem)
-    private shopItemRepository: Repository<ShopItem>,
   ) {}
 
   async getProducts(): Promise<GetListOfProductsResponse> {
-    return await this.shopItemRepository.find();
+    return await ShopItem.find();
   }
 
   async hasProduct(name: string): Promise<boolean> {
@@ -28,18 +25,32 @@ export class ShopService {
   }
 
   async getOneProduct(id: string): Promise<IShopItem> {
-    return this.shopItemRepository.findOneOrFail(id);
+    return ShopItem.findOneOrFail(id);
   }
 
   async removeProduct(id: string) {
-    await this.shopItemRepository.delete(id);
+    await ShopItem.delete(id);
   }
 
   async addBoughtCounter(id: string) {
-    const item = await this.shopItemRepository.findOneOrFail(id);
+    // await this.shopItemRepository.update(id, {
+    //   wasEverBought: true,
+    // });
+    await ShopItem.update(id, {
+      wasEverBought: true,
+    });
+
+    const item = await ShopItem.findOneOrFail(id);
 
     item.boughtCounter++;
 
-    await this.shopItemRepository.save(item);
+    await item.save();
+  }
+
+  async createProduct(): Promise<IShopItem> {
+    const newItem = new ShopItem(); //change
+    await newItem.save();
+
+    return newItem;
   }
 }

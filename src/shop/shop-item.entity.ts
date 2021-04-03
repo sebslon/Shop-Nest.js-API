@@ -1,8 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { IShopItem } from '../interfaces/shop';
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class ShopItem implements IShopItem {
+export class ShopItem extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -33,4 +32,9 @@ export class ShopItem implements IShopItem {
     default: 0,
   })
   boughtCounter: number;
+
+  @Column({
+    default: false,
+  })
+  wasEverBought: boolean;
 }
