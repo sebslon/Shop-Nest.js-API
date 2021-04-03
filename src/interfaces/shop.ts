@@ -1,8 +1,12 @@
-export interface ShopItem {
+export interface IShopItem {
+  id: string;
   name: string;
   description: string;
-  count: number;
   price: number;
 }
 
-export type GetListOfProductsResponse = ShopItem[];
+export type GetListOfProductsResponse = IShopItem[];
+
+export type GetOneProductResponse = IShopItem;
+
+export type CreateProductResponse = IShopItem;
