@@ -1,7 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BasketService } from 'src/basket/basket.service';
-import { GetListOfProductsResponse, IShopItem } from 'src/interfaces/shop';
+import {
+  GetListOfProductsResponse,
+  GetPaginatedListOfProductsResponse,
+  IShopItem,
+} from 'src/interfaces/shop';
 import { Repository } from 'typeorm';
 import { ShopItem } from './shop-item.entity';
 
@@ -12,16 +16,31 @@ export class ShopService {
     private basketService: BasketService,
   ) {}
 
-  async getProducts(): Promise<GetListOfProductsResponse> {
-    return await ShopItem.find();
+  async getProducts(
+    currentPage: number = 1,
+  ): Promise<GetPaginatedListOfProductsResponse> {
+    const maxPerPage = 3;
+
+    const [items, count] = await ShopItem.findAndCount({
+      skip: maxPerPage * (currentPage - 1),
+      take: maxPerPage,
+    });
+
+    const pagesCount = Math.ceil(count / maxPerPage);
+
+    return {
+      items,
+      pagesCount,
+    };
   }
 
   async hasProduct(name: string): Promise<boolean> {
-    return (await this.getProducts()).some((item) => item.name === name);
+    return (await this.getProducts()).items.some((item) => item.name === name);
   }
 
   async getPriceOfProduct(name: string): Promise<number> {
-    return (await this.getProducts()).find((item) => item.name === name).price;
+    return (await this.getProducts()).items.find((item) => item.name === name)
+      .price;
   }
 
   async getOneProduct(id: string): Promise<IShopItem> {
@@ -47,10 +66,17 @@ export class ShopService {
     await item.save();
   }
 
-  async createProduct(): Promise<IShopItem> {
-    const newItem = new ShopItem(); //change
-    await newItem.save();
+  async createProduct(data): Promise<IShopItem> {
+    ShopItem.save(data);
 
-    return newItem;
+    return data;
+  }
+
+  async findProducts(searchTerm: string): Promise<GetListOfProductsResponse> {
+    return await ShopItem.find({
+      order: {
+        price: 'DESC',
+      },
+    });
   }
 }

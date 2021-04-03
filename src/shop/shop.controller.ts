@@ -1,18 +1,37 @@
-import { Controller, Delete, Get, Inject, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { ShopService } from './shop.service';
 
 import {
   CreateProductResponse,
   GetListOfProductsResponse,
   GetOneProductResponse,
+  GetPaginatedListOfProductsResponse,
 } from 'src/interfaces/shop';
+import { AddProductDto } from 'src/basket/dto/add-product.dto';
 @Controller('shop')
 export class ShopController {
   constructor(@Inject(ShopService) private shopService: ShopService) {}
 
-  @Get('/')
-  getAllItems(): Promise<GetListOfProductsResponse> {
-    return this.shopService.getProducts();
+  @Get('/:pageNumber')
+  getAllItems(
+    @Param('pageNumber') pageNumber: string,
+  ): Promise<GetPaginatedListOfProductsResponse> {
+    return this.shopService.getProducts(Number(pageNumber));
+  }
+
+  @Get('/find/:searchTerm')
+  testFindItem(
+    @Param('searchTerm') searchTerm: string,
+  ): Promise<GetListOfProductsResponse> {
+    return this.shopService.findProducts(searchTerm);
   }
 
   @Get('/:id')
@@ -25,8 +44,10 @@ export class ShopController {
     return this.shopService.removeProduct(id);
   }
 
-  // @Post('/')
-  // createNewProduct(): Promise<CreateProductResponse> {
-  //   return this.shopService.createProduct();
-  // }
+  @Post('/')
+  createNewProduct(
+    @Body() data: AddProductDto,
+  ): Promise<CreateProductResponse> {
+    return this.shopService.createProduct(data);
+  }
 }
