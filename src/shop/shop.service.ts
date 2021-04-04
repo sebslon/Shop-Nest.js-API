@@ -1,12 +1,11 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { BasketService } from 'src/basket/basket.service';
 import {
   GetListOfProductsResponse,
   GetPaginatedListOfProductsResponse,
   IShopItem,
 } from 'src/interfaces/shop';
-import { Repository } from 'typeorm';
+import { Between, LessThan, Like, MoreThan } from 'typeorm';
 import { ShopItem } from './shop-item.entity';
 
 @Injectable()
@@ -17,7 +16,7 @@ export class ShopService {
   ) {}
 
   async getProducts(
-    currentPage: number = 1,
+    currentPage = 1,
   ): Promise<GetPaginatedListOfProductsResponse> {
     const maxPerPage = 3;
 
@@ -77,6 +76,11 @@ export class ShopService {
       order: {
         price: 'DESC',
       },
+      where: [
+        { price: LessThan(1000) && MoreThan(0) },
+        { price: Between(0, 1000) },
+        { description: Like(`%${searchTerm}%`) },
+      ],
     });
   }
 }

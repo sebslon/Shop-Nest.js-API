@@ -1,4 +1,12 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { ShopItemDetails } from './shop-item-details.entity';
 
 @Entity()
 export class ShopItem extends BaseEntity {
@@ -37,4 +45,8 @@ export class ShopItem extends BaseEntity {
     default: false,
   })
   wasEverBought: boolean;
+
+  @OneToOne(() => ShopItemDetails)
+  @JoinColumn()
+  details: ShopItemDetails;
 }
