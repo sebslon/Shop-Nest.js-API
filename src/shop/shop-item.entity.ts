@@ -3,6 +3,8 @@ import {
   Column,
   Entity,
   JoinColumn,
+  ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -49,4 +51,10 @@ export class ShopItem extends BaseEntity {
   @OneToOne(() => ShopItemDetails)
   @JoinColumn()
   details: ShopItemDetails;
+
+  @ManyToOne((type) => ShopItem, (entity) => entity.subShopItems)
+  mainShopItem: ShopItem;
+
+  @OneToMany((type) => ShopItem, (entity) => entity.mainShopItem)
+  subShopItems: ShopItem[];
 }
