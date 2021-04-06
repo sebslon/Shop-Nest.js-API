@@ -12,6 +12,7 @@ import {
   GetTotalPriceResponse,
   GetProductsFromBasketResponse,
   RemoveProductFromBasketResponse,
+  GetBasketStatsResponse,
 } from 'src/interfaces/basket';
 import { BasketService } from './basket.service';
 import { AddProductDto } from './dto/add-product.dto';
@@ -23,6 +24,11 @@ export class BasketController {
   @Get('/admin')
   getBasketForAdmin(): Promise<GetProductsFromBasketResponse> {
     return this.basketService.getProductsForAdmin();
+  }
+
+  @Get('/stats')
+  getStats(): Promise<GetBasketStatsResponse> {
+    return this.basketService.getStats();
   }
 
   @Get('/:userId')
