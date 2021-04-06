@@ -15,7 +15,7 @@ import {
   GetOneProductResponse,
   GetPaginatedListOfProductsResponse,
 } from 'src/interfaces/shop';
-import { AddProductDto } from 'src/basket/dto/add-product.dto';
+import { newProductDto } from './dto/new-product.dto';
 @Controller('shop')
 export class ShopController {
   constructor(@Inject(ShopService) private shopService: ShopService) {}
@@ -46,7 +46,7 @@ export class ShopController {
 
   @Post('/')
   createNewProduct(
-    @Body() data: AddProductDto,
+    @Body() data: newProductDto,
   ): Promise<CreateProductResponse> {
     return this.shopService.createProduct(data);
   }

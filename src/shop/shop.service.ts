@@ -3,6 +3,7 @@ import { BasketService } from 'src/basket/basket.service';
 import {
   GetListOfProductsResponse,
   GetPaginatedListOfProductsResponse,
+  IShopItem,
 } from 'src/interfaces/shop';
 import { getConnection } from 'typeorm';
 import { ShopItemDetails } from './shop-item-details.entity';
@@ -66,11 +67,11 @@ export class ShopService {
     await item.save();
   }
 
-  async createProduct(data): Promise<ShopItem> {
+  async createProduct(data): Promise<IShopItem> {
     const newItem = new ShopItem();
-    newItem.price = 100;
-    newItem.name = 'Spodnie';
-    newItem.description = 'Fajne spodnie';
+    newItem.price = data.price;
+    newItem.name = data.name;
+    newItem.description = data.description;
 
     await newItem.save();
 
