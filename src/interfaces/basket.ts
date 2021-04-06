@@ -1,5 +1,3 @@
-import { AddProductDto } from 'src/basket/dto/add-product.dto';
-
 export type AddProductToBasketResponse =
   | {
       isSuccess: boolean;
