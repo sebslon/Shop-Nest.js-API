@@ -1,4 +1,5 @@
 export class AddProductDto {
-  id: string;
+  productId: string;
+  userId: string;
   count: number;
 }

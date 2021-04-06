@@ -10,7 +10,7 @@ import {
 import {
   AddProductToBasketResponse,
   GetTotalPriceResponse,
-  ListProductInBasketResponse,
+  GetProductsFromBasketResponse,
   RemoveProductFromBasketResponse,
 } from 'src/interfaces/basket';
 import { BasketService } from './basket.service';
@@ -20,32 +20,42 @@ import { AddProductDto } from './dto/add-product.dto';
 export class BasketController {
   constructor(@Inject(BasketService) private basketService: BasketService) {}
 
-  @Get('/')
-  async getAllProductsFromBasket(): Promise<ListProductInBasketResponse> {
-    return this.basketService.getProductsInBasket();
+  @Get('/admin')
+  getBasketForAdmin(): Promise<GetProductsFromBasketResponse> {
+    return this.basketService.getProductsForAdmin();
+  }
+
+  @Get('/:userId')
+  getAllUserProductsFromBasket(
+    @Param('userId') userId: string,
+  ): Promise<GetProductsFromBasketResponse> {
+    return this.basketService.getProductsInUserBasket(userId);
   }
 
   @Post('/')
-  async addProductToBasket(
+  addProductToBasket(
     @Body() item: AddProductDto,
   ): Promise<AddProductToBasketResponse> {
-    return await this.basketService.addProduct(item);
+    return this.basketService.addProduct(item);
   }
 
-  @Get('/total-price')
-  async getTotalPrice(): Promise<GetTotalPriceResponse> {
-    return this.basketService.getTotalPrice();
+  @Get('/total-price/:userId')
+  getTotalPrice(
+    @Param('userId') userId: string,
+  ): Promise<GetTotalPriceResponse> {
+    return this.basketService.getTotalPrice(userId);
   }
 
-  @Delete('/all')
-  clearBasket() {
-    this.basketService.clearBasket();
+  @Delete('/all/:userId')
+  clearBasket(@Param('userId') userId: string) {
+    this.basketService.clearBasket(userId);
   }
 
-  @Delete('/:id')
-  async removeProductFromBasket(
-    @Param('id') id: string,
+  @Delete('/:itemInBasketId/:userId')
+  removeProductFromBasket(
+    @Param('itemInBasketId') itemInBasketId: string,
+    @Param('userId') userId: string,
   ): Promise<RemoveProductFromBasketResponse> {
-    return this.basketService.removeProduct(id);
+    return this.basketService.removeProduct(itemInBasketId, userId);
   }
 }

@@ -5,6 +5,7 @@ import {
   RemoveProductFromBasketResponse,
 } from 'src/interfaces/basket';
 import { ShopService } from 'src/shop/shop.service';
+import { UserService } from 'src/users/user.service';
 import { AddProductDto } from './dto/add-product.dto';
 import { ItemInBasket } from './item-in-basket.entity';
 
@@ -12,10 +13,26 @@ import { ItemInBasket } from './item-in-basket.entity';
 export class BasketService {
   constructor(
     @Inject(forwardRef(() => ShopService)) private shopService: ShopService,
+    @Inject(forwardRef(() => UserService)) private userService: UserService,
   ) {}
 
-  async getProductsInBasket(): Promise<ItemInBasket[]> {
+  async getProductsForAdmin(): Promise<ItemInBasket[]> {
     return ItemInBasket.find({
+      relations: ['shopItem', 'user'],
+    });
+  }
+
+  async getProductsInUserBasket(userId: string): Promise<ItemInBasket[]> {
+    const user = await this.userService.getUser(userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return ItemInBasket.find({
+      where: {
+        user,
+      },
       relations: ['shopItem'],
     });
   }
@@ -23,18 +40,22 @@ export class BasketService {
   async addProduct(
     product: AddProductDto,
   ): Promise<AddProductToBasketResponse> {
-    const { count, id } = product;
+    const { count, productId, userId } = product;
 
-    const shopItem = await this.shopService.getOneProduct(id);
+    const shopItem = await this.shopService.getOneProduct(productId);
+    const user = await this.userService.getUser(userId);
 
-    const invalidProductDetailsOrNotInStock =
-      typeof id !== 'string' ||
+    const invalidData =
+      typeof productId !== 'string' ||
+      typeof userId !== 'string' ||
       typeof count !== 'number' ||
-      id === '' ||
+      productId === '' ||
+      userId === '' ||
       count < 1 ||
-      !shopItem;
+      !shopItem ||
+      !user;
 
-    if (invalidProductDetailsOrNotInStock) {
+    if (invalidData) {
       return { isSuccess: false };
     }
 
@@ -43,18 +64,32 @@ export class BasketService {
 
     await item.save();
     item.shopItem = shopItem;
+    item.user = user;
 
-    this.shopService.addBoughtCounter(id);
+    this.shopService.addBoughtCounter(productId);
     await item.save();
 
     return {
       isSuccess: true,
-      id: item.id,
+      id: item.productId,
     };
   }
 
-  async removeProduct(id: string): Promise<RemoveProductFromBasketResponse> {
-    const item = await ItemInBasket.findOne(id);
+  async removeProduct(
+    itemInBasketId: string,
+    userId: string,
+  ): Promise<RemoveProductFromBasketResponse> {
+    const user = await this.userService.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const item = await ItemInBasket.findOne({
+      where: {
+        id: itemInBasketId,
+        user,
+      },
+    });
 
     if (item) {
       await item.remove();
@@ -64,13 +99,13 @@ export class BasketService {
     return { isSuccess: false };
   }
 
-  async getTotalPrice(): Promise<GetTotalPriceResponse> {
+  async getTotalPrice(userId: string): Promise<GetTotalPriceResponse> {
     const taxAdded = 1.23;
-    const items = await this.getProductsInBasket();
+    const items = await this.getProductsInUserBasket(userId);
 
-    if (!items.every((item) => this.shopService.hasProduct(item.id))) {
+    if (!items.every((item) => this.shopService.hasProduct(item.productId))) {
       const alternativeBasket = items.filter((item) =>
-        this.shopService.hasProduct(item.id),
+        this.shopService.hasProduct(item.productId),
       );
 
       return { isSuccess: false, alternativeBasket };
@@ -83,11 +118,18 @@ export class BasketService {
     ).reduce((prev, curr) => prev + curr, 0);
   }
 
-  async countPromo(): Promise<number> {
-    return (await this.getTotalPrice()) > 10 ? 1 : 0;
+  async countPromo(userId: string): Promise<number> {
+    return (await this.getTotalPrice(userId)) > 10 ? 1 : 0;
   }
 
-  async clearBasket() {
-    await ItemInBasket.delete({});
+  async clearBasket(userId: string) {
+    const user = await this.userService.getUser(userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    await ItemInBasket.delete({
+      user,
+    });
   }
 }

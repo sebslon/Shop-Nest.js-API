@@ -13,10 +13,20 @@ export interface RemoveProductFromBasketResponse {
   isSuccess: boolean;
 }
 
-export type ListProductInBasketResponse = AddProductDto[];
+export interface OneItemInBasket {
+  productId: string;
+  count: number;
+}
+
+export type GetProductsFromBasketResponse = OneItemInBasket[];
 export type GetTotalPriceResponse =
   | number
   | {
       isSuccess: false;
-      alternativeBasket: AddProductDto[];
+      alternativeBasket: OneItemInBasket[];
     };
+
+export interface GetBasketStatsResponse {
+  itemInBasketAvgPrice: number;
+  basketAvgTotalPrice: number;
+}

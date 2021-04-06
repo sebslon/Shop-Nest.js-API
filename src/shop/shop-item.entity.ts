@@ -67,6 +67,6 @@ export class ShopItem extends BaseEntity implements IShopItem {
   @JoinTable()
   sets: ShopSet[];
 
-  @OneToOne((type) => ItemInBasket, (entity) => entity.shopItem)
-  itemInBasket: ItemInBasket;
+  @OneToMany((type) => ItemInBasket, (entity) => entity.shopItem)
+  itemsInBasket: ItemInBasket[];
 }

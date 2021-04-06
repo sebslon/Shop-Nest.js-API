@@ -3,9 +3,8 @@ import { BasketService } from 'src/basket/basket.service';
 import {
   GetListOfProductsResponse,
   GetPaginatedListOfProductsResponse,
-  IShopItem,
 } from 'src/interfaces/shop';
-import { Between, getConnection, LessThan, Like, MoreThan } from 'typeorm';
+import { getConnection } from 'typeorm';
 import { ShopItemDetails } from './shop-item-details.entity';
 import { ShopItem } from './shop-item.entity';
 
