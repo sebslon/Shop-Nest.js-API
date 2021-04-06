@@ -3,7 +3,7 @@ import { AddProductDto } from 'src/basket/dto/add-product.dto';
 export type AddProductToBasketResponse =
   | {
       isSuccess: boolean;
-      index: number;
+      id: string;
     }
   | {
       isSuccess: false;

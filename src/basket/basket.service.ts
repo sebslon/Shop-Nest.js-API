@@ -2,65 +2,75 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   AddProductToBasketResponse,
   GetTotalPriceResponse,
-  ListProductInBasketResponse,
   RemoveProductFromBasketResponse,
 } from 'src/interfaces/basket';
 import { ShopService } from 'src/shop/shop.service';
 import { AddProductDto } from './dto/add-product.dto';
+import { ItemInBasket } from './item-in-basket.entity';
 
 @Injectable()
 export class BasketService {
-  private items: AddProductDto[] = [];
-
   constructor(
     @Inject(forwardRef(() => ShopService)) private shopService: ShopService,
   ) {}
 
-  listProducts(): ListProductInBasketResponse {
-    return this.items;
+  async getProductsInBasket(): Promise<ItemInBasket[]> {
+    return ItemInBasket.find({
+      relations: ['shopItem'],
+    });
   }
 
-  addProduct(product: AddProductDto): AddProductToBasketResponse {
-    const { name, count, id } = product;
+  async addProduct(
+    product: AddProductDto,
+  ): Promise<AddProductToBasketResponse> {
+    const { count, id } = product;
+
+    const shopItem = await this.shopService.getOneProduct(id);
+
     const invalidProductDetailsOrNotInStock =
-      typeof name !== 'string' ||
+      typeof id !== 'string' ||
       typeof count !== 'number' ||
-      name === '' ||
+      id === '' ||
       count < 1 ||
-      !this.shopService.hasProduct(name);
+      !shopItem;
 
     if (invalidProductDetailsOrNotInStock) {
       return { isSuccess: false };
     }
 
-    this.items.push(product);
+    const item = new ItemInBasket();
+    item.count = count;
+
+    await item.save();
+    item.shopItem = shopItem;
+
     this.shopService.addBoughtCounter(id);
+    await item.save();
 
     return {
       isSuccess: true,
-      index: this.items.length - 1,
+      id: item.id,
     };
   }
 
-  removeProduct(index: number): RemoveProductFromBasketResponse {
-    const { items } = this;
-    if (index < 0 || index >= items.length) {
-      return { isSuccess: false };
+  async removeProduct(id: string): Promise<RemoveProductFromBasketResponse> {
+    const item = await ItemInBasket.findOne(id);
+
+    if (item) {
+      await item.remove();
+      return { isSuccess: true };
     }
 
-    items.splice(index, 1);
-
-    return {
-      isSuccess: true,
-    };
+    return { isSuccess: false };
   }
 
   async getTotalPrice(): Promise<GetTotalPriceResponse> {
     const taxAdded = 1.23;
+    const items = await this.getProductsInBasket();
 
-    if (!this.items.every((item) => this.shopService.hasProduct(item.name))) {
-      const alternativeBasket = this.items.filter((item) =>
-        this.shopService.hasProduct(item.name),
+    if (!items.every((item) => this.shopService.hasProduct(item.id))) {
+      const alternativeBasket = items.filter((item) =>
+        this.shopService.hasProduct(item.id),
       );
 
       return { isSuccess: false, alternativeBasket };
@@ -68,17 +78,16 @@ export class BasketService {
 
     return (
       await Promise.all(
-        this.items.map(
-          async (item) =>
-            (await this.shopService.getPriceOfProduct(item.name)) *
-            item.count *
-            taxAdded,
-        ),
+        items.map(async (item) => item.shopItem.price * item.count * taxAdded),
       )
     ).reduce((prev, curr) => prev + curr, 0);
   }
 
   async countPromo(): Promise<number> {
     return (await this.getTotalPrice()) > 10 ? 1 : 0;
+  }
+
+  async clearBasket() {
+    await ItemInBasket.delete({});
   }
 }

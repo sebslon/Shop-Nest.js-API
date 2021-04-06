@@ -21,24 +21,31 @@ export class BasketController {
   constructor(@Inject(BasketService) private basketService: BasketService) {}
 
   @Get('/')
-  listProductsInBasket(): ListProductInBasketResponse {
-    return this.basketService.listProducts();
+  async getAllProductsFromBasket(): Promise<ListProductInBasketResponse> {
+    return this.basketService.getProductsInBasket();
   }
 
   @Post('/')
-  addProductToBasket(@Body() item: AddProductDto): AddProductToBasketResponse {
-    return this.basketService.addProduct(item);
-  }
-
-  @Delete('/:index')
-  removeProductFromBasket(
-    @Param('index') index: string,
-  ): RemoveProductFromBasketResponse {
-    return this.basketService.removeProduct(Number(index));
+  async addProductToBasket(
+    @Body() item: AddProductDto,
+  ): Promise<AddProductToBasketResponse> {
+    return await this.basketService.addProduct(item);
   }
 
   @Get('/total-price')
-  getTotalPrice(): Promise<GetTotalPriceResponse> {
+  async getTotalPrice(): Promise<GetTotalPriceResponse> {
     return this.basketService.getTotalPrice();
+  }
+
+  @Delete('/all')
+  clearBasket() {
+    this.basketService.clearBasket();
+  }
+
+  @Delete('/:id')
+  async removeProductFromBasket(
+    @Param('id') id: string,
+  ): Promise<RemoveProductFromBasketResponse> {
+    return this.basketService.removeProduct(id);
   }
 }

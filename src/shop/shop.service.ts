@@ -5,7 +5,8 @@ import {
   GetPaginatedListOfProductsResponse,
   IShopItem,
 } from 'src/interfaces/shop';
-import { Between, LessThan, Like, MoreThan } from 'typeorm';
+import { Between, getConnection, LessThan, Like, MoreThan } from 'typeorm';
+import { ShopItemDetails } from './shop-item-details.entity';
 import { ShopItem } from './shop-item.entity';
 
 @Injectable()
@@ -21,6 +22,7 @@ export class ShopService {
     const maxPerPage = 3;
 
     const [items, count] = await ShopItem.findAndCount({
+      relations: ['details', 'sets'],
       skip: maxPerPage * (currentPage - 1),
       take: maxPerPage,
     });
@@ -33,16 +35,16 @@ export class ShopService {
     };
   }
 
-  async hasProduct(name: string): Promise<boolean> {
-    return (await this.getProducts()).items.some((item) => item.name === name);
+  async hasProduct(id: string): Promise<boolean> {
+    return (await this.getProducts()).items.some((item) => item.id === id);
   }
 
-  async getPriceOfProduct(name: string): Promise<number> {
-    return (await this.getProducts()).items.find((item) => item.name === name)
+  async getPriceOfProduct(id: string): Promise<number> {
+    return (await this.getProducts()).items.find((item) => item.id === id)
       .price;
   }
 
-  async getOneProduct(id: string): Promise<IShopItem> {
+  async getOneProduct(id: string): Promise<ShopItem> {
     return ShopItem.findOneOrFail(id);
   }
 
@@ -65,22 +67,56 @@ export class ShopService {
     await item.save();
   }
 
-  async createProduct(data): Promise<IShopItem> {
-    ShopItem.save(data);
+  async createProduct(data): Promise<ShopItem> {
+    const newItem = new ShopItem();
+    newItem.price = 100;
+    newItem.name = 'Spodnie';
+    newItem.description = 'Fajne spodnie';
 
-    return data;
+    await newItem.save();
+
+    const details = new ShopItemDetails();
+    details.color = 'niebieskie';
+    details.width = 20;
+
+    await details.save();
+
+    newItem.details = details;
+
+    await newItem.save();
+
+    return newItem;
   }
 
   async findProducts(searchTerm: string): Promise<GetListOfProductsResponse> {
-    return await ShopItem.find({
-      order: {
-        price: 'DESC',
-      },
-      where: [
-        { price: LessThan(1000) && MoreThan(0) },
-        { price: Between(0, 1000) },
-        { description: Like(`%${searchTerm}%`) },
-      ],
-    });
+    const count = await getConnection()
+      .createQueryBuilder()
+      .select('COUNT(shopItem.id)', 'count')
+      .from(ShopItem, 'shopItem')
+      .getRawOne();
+
+    return await getConnection()
+      .createQueryBuilder()
+      .select('shopItem')
+      .from(ShopItem, 'shopItem')
+      .where('shopItem.description LIKE :searchTerm', {
+        searchTerm: `%${searchTerm}%`,
+      })
+      .orderBy('shopItem.id', 'ASC')
+      .addOrderBy('price', 'ASC')
+      .skip(10)
+      .take(5)
+      .getMany();
+    //   return await ShopItem.find({
+    //     order: {
+    //       price: 'DESC',
+    //     },
+    //     where: [
+    //       { price: LessThan(1000) && MoreThan(0) },
+    //       { price: Between(0, 1000) },
+    //       { description: Like(`%${searchTerm}%`) },
+    //     ],
+    //   });
+    // }
   }
 }
