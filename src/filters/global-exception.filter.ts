@@ -22,6 +22,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       statusCode: status,
       path: request.url,
       message: 'Something went wrong..',
+      error: exception instanceof HttpException ? exception.message : 'Error',
     });
   }
 }
