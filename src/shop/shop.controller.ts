@@ -20,6 +20,11 @@ import { newProductDto } from './dto/new-product.dto';
 export class ShopController {
   constructor(@Inject(ShopService) private shopService: ShopService) {}
 
+  @Get('/testerror')
+  test() {
+    throw new Error('');
+  }
+
   @Get('/:pageNumber')
   getAllItems(
     @Param('pageNumber') pageNumber: string,
