@@ -66,8 +66,7 @@ export class BasketService {
 
     const basketAvgTotalPrice =
       basketValues.reduce((prev, curr) => prev + curr, 0) / basketValues.length;
-    console.log(baskets);
-    console.log(basketValues.length);
+
     return {
       itemInBasketAvgPrice,
       basketAvgTotalPrice,

@@ -4,9 +4,10 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { tap } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
-import { Reflector } from '@nestjs/core';
+import { CacheItem } from 'src/cache/cache-item.entity';
 
 @Injectable()
 export class MyCacheInterceptor implements NestInterceptor {
@@ -17,21 +18,43 @@ export class MyCacheInterceptor implements NestInterceptor {
     next: CallHandler,
   ): Promise<Observable<any>> {
     const method = context.getHandler();
+    const controllerName = context.getClass().name;
+    const actionName = method.name;
 
-    const cachedData = this.reflector.get<any>('cacheData', method);
-    const cachedTime = this.reflector.get<Date>('cacheTime', method);
-    const timeOut = +cachedTime + 10 * 1000 > +new Date();
+    const cacheTimeInSecs = this.reflector.get<number>(
+      'cacheTimeInSecs',
+      method,
+    );
 
-    if (cachedData && timeOut) {
-      //use cached data
-      return of(cachedData);
-    } else {
-      return next.handle().pipe(
-        tap((data) => {
-          Reflect.defineMetadata('cacheData', data, method);
-          Reflect.defineMetadata('cacheTime', new Date(), method);
-        }),
-      );
+    const cachedData = await CacheItem.findOne({
+      where: {
+        controllerName,
+        actionName,
+      },
+    });
+
+    const timeOut =
+      +cachedData.createdAt + cacheTimeInSecs * 1000 > +new Date();
+
+    if (cachedData) {
+      if (timeOut) {
+        //use cached data
+        return of(JSON.parse(cachedData.dataJson));
+      } else {
+        //remove old cache data
+        await cachedData.remove();
+      }
     }
+
+    return next.handle().pipe(
+      tap(async (data) => {
+        console.log(data);
+        const newCachedData = new CacheItem();
+        newCachedData.controllerName = controllerName;
+        newCachedData.actionName = actionName;
+        newCachedData.dataJson = JSON.stringify(data);
+        await newCachedData.save();
+      }),
+    );
   }
 }

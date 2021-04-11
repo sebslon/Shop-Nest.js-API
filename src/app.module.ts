@@ -9,9 +9,16 @@ import { ShopController } from './shop/shop.controller';
 import { ShopModule } from './shop/shop.module';
 import { ShopService } from './shop/shop.service';
 import { UserModule } from './users/user.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(), BasketModule, ShopModule, UserModule],
+  imports: [
+    TypeOrmModule.forRoot(),
+    BasketModule,
+    ShopModule,
+    UserModule,
+    CacheModule,
+  ],
   controllers: [AppController, ShopController, BasketController],
   providers: [AppService, ShopService, BasketService],
 })
