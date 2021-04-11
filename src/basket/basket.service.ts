@@ -5,6 +5,7 @@ import {
   GetTotalPriceResponse,
   RemoveProductFromBasketResponse,
 } from 'src/interfaces/basket';
+import { MailService } from 'src/mail/mail.service';
 import { ShopService } from 'src/shop/shop.service';
 import { UserService } from 'src/users/user.service';
 import { getConnection } from 'typeorm';
@@ -16,6 +17,7 @@ export class BasketService {
   constructor(
     @Inject(forwardRef(() => ShopService)) private shopService: ShopService,
     @Inject(forwardRef(() => UserService)) private userService: UserService,
+    @Inject(forwardRef(() => MailService)) private mailService: MailService,
   ) {}
 
   async getProductsForAdmin(): Promise<ItemInBasket[]> {
@@ -104,6 +106,12 @@ export class BasketService {
 
     this.shopService.addBoughtCounter(productId);
     await item.save();
+
+    // await this.mailService.sendMail(
+    //   user.email,
+    //   'Your Basket',
+    //   `Added ${shopItem.name} to your basket.`,
+    // );
 
     return {
       isSuccess: true,

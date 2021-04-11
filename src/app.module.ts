@@ -10,8 +10,8 @@ import { ShopModule } from './shop/shop.module';
 import { ShopService } from './shop/shop.service';
 import { UserModule } from './users/user.module';
 import { CacheModule } from './cache/cache.module';
-import { DiscountCodeModule } from './discount-code/discount-code.module';
 import { CronModule } from './cron/cron.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -20,8 +20,8 @@ import { CronModule } from './cron/cron.module';
     ShopModule,
     UserModule,
     CacheModule,
-    DiscountCodeModule,
     CronModule,
+    MailModule,
   ],
   controllers: [AppController, ShopController, BasketController],
   providers: [AppService, ShopService, BasketService],
