@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {
   Body,
   Controller,
@@ -6,16 +7,23 @@ import {
   Inject,
   Param,
   Post,
+  Res,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ShopService } from './shop.service';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
+import { ShopService } from './shop.service';
+import { newProductDto } from './dto/new-product.dto';
+import { multerStorage, storageDir } from 'src/utils/storage';
+import { MulterDiskUploadedFiles } from 'src/interfaces/files';
 import {
   CreateProductResponse,
   GetListOfProductsResponse,
   GetOneProductResponse,
   GetPaginatedListOfProductsResponse,
 } from 'src/interfaces/shop';
-import { newProductDto } from './dto/new-product.dto';
+
 @Controller('shop')
 export class ShopController {
   constructor(@Inject(ShopService) private shopService: ShopService) {}
@@ -23,6 +31,11 @@ export class ShopController {
   @Get('/testerror')
   test() {
     throw new Error('');
+  }
+
+  @Get('/photo/:id')
+  async getPhoto(@Param('id') id: string, @Res() res: any): Promise<any> {
+    return this.shopService.getPhoto(id, res);
   }
 
   @Get('/:pageNumber')
@@ -49,10 +62,16 @@ export class ShopController {
     return this.shopService.removeProduct(id);
   }
 
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'photo', maxCount: 1 }], {
+      storage: multerStorage(path.join(storageDir(), 'product-photos')),
+    }),
+  )
   @Post('/')
   createNewProduct(
     @Body() data: newProductDto,
+    @UploadedFiles() files: MulterDiskUploadedFiles,
   ): Promise<CreateProductResponse> {
-    return this.shopService.createProduct(data);
+    return this.shopService.createProduct(data, files);
   }
 }

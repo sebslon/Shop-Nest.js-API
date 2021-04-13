@@ -9,7 +9,7 @@
 
 <hr>
 
-<p align="center">Simple Nest.js training playground. Including some features to future use.🙂 </p>
+<p align="center">Simple Nest.js API training playground. Including some features to future use.🙂 </p>
 
 - Cache, cron actions,
 - simple decorators, 

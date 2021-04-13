@@ -1,13 +1,18 @@
+import * as path from 'path';
+import * as fs from 'fs';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { getConnection } from 'typeorm';
+
 import { BasketService } from 'src/basket/basket.service';
+import { newProductDto } from './dto/new-product.dto';
+import { ShopItem } from './shop-item.entity';
+import { MulterDiskUploadedFiles } from 'src/interfaces/files';
 import {
   GetListOfProductsResponse,
   GetPaginatedListOfProductsResponse,
   IShopItem,
 } from 'src/interfaces/shop';
-import { getConnection } from 'typeorm';
-import { ShopItemDetails } from './shop-item-details.entity';
-import { ShopItem } from './shop-item.entity';
+import { storageDir } from 'src/utils/storage';
 
 @Injectable()
 export class ShopService {
@@ -15,6 +20,11 @@ export class ShopService {
     @Inject(forwardRef(() => BasketService))
     private basketService: BasketService,
   ) {}
+
+  filter(shopItem: ShopItem) {
+    const { id, price, description, name } = shopItem;
+    return { id, price, description, name };
+  }
 
   async getProducts(
     currentPage = 1,
@@ -67,25 +77,39 @@ export class ShopService {
     await item.save();
   }
 
-  async createProduct(data): Promise<IShopItem> {
-    const newItem = new ShopItem();
-    newItem.price = data.price;
-    newItem.name = data.name;
-    newItem.description = data.description;
+  async createProduct(
+    data: newProductDto,
+    files: MulterDiskUploadedFiles,
+  ): Promise<IShopItem> {
+    const photo = files?.photo?.[0] ?? null;
 
-    await newItem.save();
+    try {
+      const shopItem = new ShopItem();
+      shopItem.name = data.name;
+      shopItem.description = data.description;
+      shopItem.price = data.price;
 
-    const details = new ShopItemDetails();
-    details.color = 'niebieskie';
-    details.width = 20;
+      if (photo) {
+        shopItem.photoFilename = photo.filename;
+      }
 
-    await details.save();
+      await shopItem.save();
 
-    newItem.details = details;
+      return this.filter(shopItem);
+    } catch (e) {
+      try {
+        if (photo) {
+          console.log('aaa');
+          fs.unlinkSync(
+            path.join(storageDir(), 'product-photos', photo.filename),
+          );
+        }
+      } catch (e2) {
+        //deleting file failed
+      }
 
-    await newItem.save();
-
-    return newItem;
+      throw e;
+    }
   }
 
   async findProducts(searchTerm: string): Promise<GetListOfProductsResponse> {
@@ -118,5 +142,26 @@ export class ShopService {
     //     ],
     //   });
     // }
+  }
+  async getPhoto(id: string, res: any) {
+    try {
+      const product = await ShopItem.findOne(id);
+
+      if (!product) {
+        throw new Error('No object found!');
+      }
+
+      if (!product.photoFilename) {
+        throw new Error("This entity doesn't have a photo!");
+      }
+
+      res.sendFile(product.photoFilename, {
+        root: path.join(storageDir(), 'product-photos'),
+      });
+    } catch (e) {
+      res.json({
+        error: e.message,
+      });
+    }
   }
 }

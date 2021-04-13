@@ -1,12 +1,15 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class newProductDto {
-  @IsNotEmpty()
+  // @IsNotEmpty()
+  @IsString()
   name: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
+  @IsString()
   description: string;
 
-  @IsNotEmpty()
+  // @IsNotEmpty()
+  @IsNumber()
   price: number;
 }

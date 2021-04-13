@@ -35,6 +35,8 @@
     "class-validator": "^0.13.1",
     "helmet": "^4.4.1",
     "mariadb": "^2.5.3",
+    "mime": "^2.5.2",
+    "multer": "^1.4.2",
     "mysql": "^2.18.1",
     "nodemailer": "^6.5.0",
     "prettier": "^2.2.1",

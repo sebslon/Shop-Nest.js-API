@@ -53,6 +53,12 @@ export class ShopItem extends BaseEntity implements IShopItem {
   })
   wasEverBought: boolean;
 
+  @Column({
+    default: null,
+    nullable: true,
+  })
+  photoFilename: string;
+
   @OneToOne(() => ShopItemDetails)
   @JoinColumn()
   details: ShopItemDetails;
