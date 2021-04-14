@@ -8,8 +8,8 @@ import {
 } from 'src/interfaces/basket';
 import { MailService } from 'src/mail/mail.service';
 import { ShopService } from 'src/shop/shop.service';
-import { User } from 'src/users/user.entity';
-import { UserService } from 'src/users/user.service';
+import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 import { getConnection } from 'typeorm';
 import { AddProductDto } from './dto/add-product.dto';
 import { ItemInBasket } from './item-in-basket.entity';

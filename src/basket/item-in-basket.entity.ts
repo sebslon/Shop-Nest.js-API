@@ -1,5 +1,5 @@
 import { ShopItem } from 'src/shop/shop-item.entity';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   BaseEntity,
   Column,

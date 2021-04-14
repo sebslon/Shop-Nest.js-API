@@ -26,7 +26,7 @@ import { MyCacheInterceptor } from 'src/interceptors/mycache-interceptor';
 import { UseCacheTime } from 'src/decorators/use-cache-time.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { UserObj } from 'src/decorators/user-obj.decorator';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Controller('basket')
 export class BasketController {
