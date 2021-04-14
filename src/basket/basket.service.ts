@@ -1,4 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+
 import {
   AddProductToBasketResponse,
   GetBasketStatsResponse,
@@ -7,6 +8,7 @@ import {
 } from 'src/interfaces/basket';
 import { MailService } from 'src/mail/mail.service';
 import { ShopService } from 'src/shop/shop.service';
+import { User } from 'src/users/user.entity';
 import { UserService } from 'src/users/user.service';
 import { getConnection } from 'typeorm';
 import { AddProductDto } from './dto/add-product.dto';
@@ -77,21 +79,18 @@ export class BasketService {
 
   async addProduct(
     product: AddProductDto,
+    user: User,
   ): Promise<AddProductToBasketResponse> {
-    const { count, productId, userId } = product;
+    const { count, productId } = product;
 
     const shopItem = await this.shopService.getOneProduct(productId);
-    const user = await this.userService.getUser(userId);
 
     const invalidData =
       typeof productId !== 'string' ||
-      typeof userId !== 'string' ||
       typeof count !== 'number' ||
       productId === '' ||
-      userId === '' ||
       count < 1 ||
-      !shopItem ||
-      !user;
+      !shopItem;
 
     if (invalidData) {
       return { isSuccess: false };

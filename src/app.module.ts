@@ -1,29 +1,29 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { BasketController } from './basket/basket.controller';
-import { BasketModule } from './basket/basket.module';
-import { BasketService } from './basket/basket.service';
-import { ShopController } from './shop/shop.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserModule } from './user/user.module';
 import { ShopModule } from './shop/shop.module';
-import { ShopService } from './shop/shop.service';
-import { UserModule } from './users/user.module';
-import { CacheModule } from './cache/cache.module';
+import { BasketModule } from './basket/basket.module';
 import { CronModule } from './cron/cron.module';
+import { CacheModule } from './cache/cache.module';
 import { MailModule } from './mail/mail.module';
+import { AuthModule } from './auth/auth.module';
+// import { ConsoleModule } from 'nestjs-console';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(),
-    BasketModule,
     ShopModule,
+    BasketModule,
     UserModule,
-    CacheModule,
     CronModule,
+    CacheModule,
     MailModule,
+    AuthModule,
+    // ConsoleModule,
   ],
-  controllers: [AppController, ShopController, BasketController],
-  providers: [AppService, ShopService, BasketService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

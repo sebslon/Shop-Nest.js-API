@@ -1,9 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class AddProductDto {
+export class AuthLoginDto {
   @IsNotEmpty()
-  productId: string;
+  email: string;
 
   @IsNotEmpty()
-  count: number;
+  pwd: string;
 }
