@@ -21,7 +21,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm:migration:generate": "ts-node ./node_modules/typeorm/cli.js migration:generate -n NEW_DATABASE_NAME",
     "typeorm:migration:run": "tsc && node ./node_modules/typeorm/cli.js migration:run",
-    "typeorm:migration:revert": "tsc && node ./node_modules/typeorm/cli.js migration:revert"
+    "typeorm:migration:revert": "tsc && node ./node_modules/typeorm/cli.js migration:revert",
+    "console:dev": "yarn build && yarn console",
+    "console": "node dist/console.js"
   },
   "dependencies": {
     "@nest-modules/mailer": "^1.3.22",
@@ -34,6 +36,7 @@
     "@nestjs/typeorm": "^7.1.5",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
+    "commander": "^7.2.0",
     "cookie-parser": "^1.4.5",
     "helmet": "^4.4.1",
     "mariadb": "^2.5.3",

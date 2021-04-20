@@ -9,10 +9,11 @@
 
 <hr>
 
-<p align="center">Simple Nest.js API training playground. Including some features to future use.🙂 </p>
+<p align="center">Shop - Nest.js API training playground/template. Including some features to future use.🙂 </p>
 
 - Cache, cron actions,
 - simple decorators, 
 - pipes, filters, 
 - guards, interceptors
+- authentication, authorization,
 etc.

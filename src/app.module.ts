@@ -9,7 +9,7 @@ import { CronModule } from './cron/cron.module';
 import { CacheModule } from './cache/cache.module';
 import { MailModule } from './mail/mail.module';
 import { AuthModule } from './auth/auth.module';
-// import { ConsoleModule } from 'nestjs-console';
+import { ConsoleModule } from 'nestjs-console';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { AuthModule } from './auth/auth.module';
     CacheModule,
     MailModule,
     AuthModule,
-    // ConsoleModule,
+    ConsoleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
